@@ -67,9 +67,9 @@ KP計算、CSVの引用符・改行、文字コード、入力エラー、5,000�
 
 - `index.html`: 検索可能な説明文と画面構造
 - `assets/style.css`: 黒基調のデザイン
-- `assets/core.mjs`: CSV解析、検証、KP集計
-- `assets/workbook.mjs`: Excel生成
-- `assets/app.mjs`: 画面とファイル操作
+- `assets/core.js`: CSV解析、検証、KP集計
+- `assets/workbook.js`: Excel生成
+- `assets/app.js`: 画面とファイル操作
 - `assets/vendor/`: 同梱したExcelJS 4.4.0（MIT License）
 
 入力ファイルはブラウザのメモリ上だけで処理します。集計データの外部送信、アクセス解析、Cookie、localStorageは使用しません。ページ配信時の通常のアクセスログはホスティング事業者の管理対象です。依存ライブラリも同梱し、実行時のCDNへの接続を不要にしています。

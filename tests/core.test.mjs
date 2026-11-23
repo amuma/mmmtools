@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { HEADERS, SAMPLE_CSV, analyzeCsv, parseCsv, decodeCsv, MAX_BYTES, MAX_PLAYERS, CsvError } from '../assets/core.mjs';
-import { createWorkbook } from '../assets/workbook.mjs';
+import { HEADERS, SAMPLE_CSV, analyzeCsv, parseCsv, decodeCsv, MAX_BYTES, MAX_PLAYERS, CsvError } from '../assets/core.js';
+import { createWorkbook } from '../assets/workbook.js';
 const require = createRequire(import.meta.url);
 const ExcelJS = require('../assets/vendor/exceljs-4.4.0.min.js');
 const header = HEADERS.join(',');

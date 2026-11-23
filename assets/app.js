@@ -1,5 +1,5 @@
-import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, SAMPLE_CSV, MAX_BYTES, CsvError } from './core.mjs';
-import { createWorkbook } from './workbook.mjs';
+import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, SAMPLE_CSV, MAX_BYTES, CsvError } from './core.js';
+import { createWorkbook } from './workbook.js';
 
 const $ = id => document.getElementById(id);
 const state = { data: null, tab: 'pokemon', page: 1, name: '', buffer: null, sample: false, busy: false, generation: 0 };
