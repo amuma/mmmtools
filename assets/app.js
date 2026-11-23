@@ -1,8 +1,8 @@
-import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, SAMPLE_CSV, MAX_BYTES, CsvError } from './core.js';
+import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, MAX_BYTES, CsvError } from './core.js';
 import { createWorkbook } from './workbook.js';
 
 const $ = id => document.getElementById(id);
-const state = { data: null, tab: 'pokemon', page: 1, name: '', buffer: null, sample: false, busy: false, generation: 0 };
+const state = { data: null, tab: 'pokemon', page: 1, name: '', buffer: null, busy: false, generation: 0 };
 const PAGE_SIZE = 25;
 const number = new Intl.NumberFormat('ja');
 const percent = value => `${(value * 100).toFixed(1)}%`;
@@ -22,7 +22,7 @@ function feedback(messages, error = false) {
 
 function setBusy(busy) {
   state.busy = busy;
-  for (const id of ['choose-file', 'sample-button', 'empty-sample', 'encoding', 'reset-button']) $(id).disabled = busy;
+  for (const id of ['choose-file', 'encoding', 'reset-button']) $(id).disabled = busy;
   $('export-button').disabled = busy || !state.data;
   $('drop-zone').setAttribute('aria-busy', String(busy));
   $('export-label').textContent = busy && state.data ? 'Excelを作成中…' : 'Excelをダウンロード';
@@ -30,24 +30,24 @@ function setBusy(busy) {
 
 function reset() {
   state.generation++;
-  Object.assign(state, { data: null, buffer: null, name: '', sample: false, page: 1 });
+  Object.assign(state, { data: null, buffer: null, name: '', page: 1 });
   $('csv-file').value = ''; $('search').value = ''; $('sort').value = 'desc';
   $('empty-state').hidden = false; $('result-content').hidden = true;
   $('table-body').replaceChildren(); $('file-name').textContent = '';
   feedback([]); setBusy(false);
 }
 
-function showResults(data, name, sample, encoding = '') {
-  Object.assign(state, { data, name, sample, page: 1 });
+function showResults(data, name, encoding = '') {
+  Object.assign(state, { data, name, page: 1 });
   $('search').value = ''; $('sort').value = 'desc';
   $('empty-state').hidden = true; $('result-content').hidden = false;
-  $('file-name').textContent = name; $('sample-tag').hidden = !sample;
+  $('file-name').textContent = name;
   $('stat-players').textContent = number.format(data.totalPlayers);
   $('stat-species').textContent = number.format(data.totalSpecies);
   const leaders = data.pokemon.filter(item => item.rank === 1);
   $('stat-top').textContent = leaders[0].name + (leaders.length > 1 ? ` ほか${leaders.length - 1}種` : '');
   $('stat-top-detail').textContent = `KP ${leaders[0].kp} / 採用率 ${percent(leaders[0].usage)}`;
-  feedback([`${sample ? 'サンプルの' : ''}${number.format(data.totalPlayers)}人のパーティを集計しました。${encoding ? `（${encoding === 'utf-8' ? 'UTF-8' : 'Shift_JIS'} / ${data.hasHeader ? 'ヘッダーあり' : 'ヘッダーなし'}）` : ''}`]);
+  feedback([`${number.format(data.totalPlayers)}人のパーティを集計しました。${encoding ? `（${encoding === 'utf-8' ? 'UTF-8' : 'Shift_JIS'} / ${data.hasHeader ? 'ヘッダーあり' : 'ヘッダーなし'}）` : ''}`]);
   renderTable();
 }
 
@@ -63,20 +63,13 @@ async function loadFile(file, reloadBuffer = null) {
     const decoded = decodeCsv(buffer, $('encoding').value);
     const data = analyzeCsv(decoded.text);
     state.buffer = buffer;
-    showResults(data, file.name, false, decoded.encoding);
+    showResults(data, file.name, decoded.encoding);
   } catch (error) {
     if (generation !== state.generation) return;
     // 読み込み失敗時は古い集計結果を残さず、誤ったExcelの出力を防ぎます。
     reset();
     feedback(error instanceof CsvError ? error.messages : ['ファイルを読み込めませんでした。CSVの内容と文字コードを確認してください。'], true);
   } finally { setBusy(false); }
-}
-
-function loadSample() {
-  if (state.busy) return;
-  state.generation++; state.buffer = null; $('csv-file').value = '';
-  showResults(analyzeCsv(SAMPLE_CSV), 'sample.csv', true);
-  setBusy(false);
 }
 
 function textCell(row, text, className = '') {
@@ -141,7 +134,6 @@ function download(blob, name) {
 
 $('choose-file').addEventListener('click', () => { $('csv-file').value = ''; $('csv-file').click(); });
 $('csv-file').addEventListener('change', event => loadFile(event.target.files[0]));
-$('sample-button').addEventListener('click', loadSample); $('empty-sample').addEventListener('click', loadSample);
 $('reset-button').addEventListener('click', reset);
 $('encoding').addEventListener('change', () => {
   if (state.buffer) loadFile({ name: state.name, size: state.buffer.byteLength }, state.buffer);
