@@ -22,6 +22,42 @@ test('主要なフォルムが通常種のアイコンと区別される', () =>
 test('未知の名前や任意のフォルムを別のポケモンに誤変換しない', () => {
   for (const name of ['未登録', 'カイリュー(未登録フォルム)', '__proto__', '<img src=x onerror=alert(1)>', '=1+1']) assert.equal(getPokemonIconIndex(name), null);
 });
+test('指定された49種類の括弧表記を対応するフォルムへ解決する', () => {
+  const groups = [
+    ['ロトム', [['水', 'rotom-wash'], ['氷', 'rotom-frost'], ['火', 'rotom-heat'], ['飛', 'rotom-fan'], ['草', 'rotom-mow']]],
+    ['デオキシス', [['アタック', 'deoxys-attack'], ['スピード', 'deoxys-speed'], ['ディフェンス', 'deoxys-defense'], ['ノーマル', 'deoxys-normal']]],
+    ['ギラティナ', [['オリジン', 'giratina-origin'], ['アナザー', 'giratina-altered']]],
+    ['ディアルガ', [['オリジン', 'dialga-origin']]],
+    ['パルキア', [['オリジン', 'palkia-origin']]],
+    ['オーガポン', [['みどり', 'ogerpon'], ['いど', 'ogerpon-wellspring-mask'], ['かまど', 'ogerpon-hearthflame-mask'], ['いしずえ', 'ogerpon-cornerstone-mask']]],
+    ['トルネロス', [['けしん', 'tornadus-incarnate'], ['れいじゅう', 'tornadus-therian']]],
+    ['ボルトロス', [['けしん', 'thundurus-incarnate'], ['れいじゅう', 'thundurus-therian']]],
+    ['ランドロス', [['けしん', 'landorus-incarnate'], ['れいじゅう', 'landorus-therian']]],
+    ['ラブトロス', [['けしん', 'enamorus-incarnate'], ['れいじゅう', 'enamorus-therian']]],
+    ['キュレム', [['ブラック', 'kyurem-black'], ['ホワイト', 'kyurem-white']]],
+    ['ネクロズマ', [['あかつき', 'necrozma-dawn'], ['たそがれ', 'necrozma-dusk']]],
+    ['バドレックス', [['はくばじょう', 'calyrex-ice'], ['こくばじょう', 'calyrex-shadow']]],
+    ['ミノムッチ', [['くさき', 'burmy-plant'], ['すなち', 'burmy-sandy'], ['ゴミ', 'burmy-trash']]],
+    ['ミノマダム', [['くさき', 'wormadam-plant'], ['すなち', 'wormadam-sandy'], ['ゴミ', 'wormadam-trash']]],
+    ['オドリドリ', [['ぱちぱち', 'oricorio-pom-pom'], ['ふらふら', 'oricorio-pau'], ['めらめら', 'oricorio-baile'], ['まいまい', 'oricorio-sensu']]],
+    ['シキジカ', [['はる', 'deerling-spring'], ['なつ', 'deerling-summer'], ['あき', 'deerling-autumn'], ['ふゆ', 'deerling-winter']]],
+    ['メブキジカ', [['はる', 'sawsbuck-spring'], ['なつ', 'sawsbuck-summer'], ['あき', 'sawsbuck-autumn'], ['ふゆ', 'sawsbuck-winter']]]
+  ];
+  let checked = 0;
+  for (const [species, forms] of groups) {
+    const indexes = [];
+    for (const [form, canonical] of forms) {
+      const input = `${species}（${form}）`;
+      const index = getPokemonIconIndex(input);
+      assert.notEqual(index, null, input);
+      assert.equal(index, getPokemonIconIndex(canonical), input);
+      assert.equal(index, getPokemonIconIndex(`${species}(${form})`), input);
+      indexes.push(index); checked++;
+    }
+    assert.equal(new Set(indexes).size, forms.length, `${species}の各フォルムは異なる画像を使用する`);
+  }
+  assert.equal(checked, 49);
+});
 test('すべてのアイコンが同梱画像の範囲内にある', () => {
   const png = readFileSync(new URL('../assets/pokemon/icons.png', import.meta.url));
   assert.equal(png.readUInt32BE(16), 480);

@@ -1,6 +1,6 @@
 import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, MAX_BYTES, CsvError } from './core.js';
 import { createWorkbook } from './workbook.js';
-import { createPokemonLabel } from './pokemon-icons.js';
+import { createPokemonLabel } from './pokemon-icons.js?v=4';
 
 const $ = id => document.getElementById(id);
 const state = { data: null, tab: 'pokemon', page: 1, name: '', buffer: null, busy: false, generation: 0 };
@@ -137,10 +137,6 @@ function download(blob, name) {
 }
 
 $('choose-file').addEventListener('click', () => { $('csv-file').value = ''; $('csv-file').click(); });
-// CSVの記入例も同じアイコン表示に揃えます。入力する文字列は名前のままです。
-document.querySelectorAll('.example-table tbody td:not(:first-child)').forEach(cell => {
-  const name = cell.textContent.trim(); cell.replaceChildren(createPokemonLabel(name));
-});
 $('csv-file').addEventListener('change', event => loadFile(event.target.files[0]));
 $('reset-button').addEventListener('click', reset);
 $('encoding').addEventListener('change', () => {
@@ -187,3 +183,4 @@ $('export-button').addEventListener('click', async () => {
   } catch { feedback(['Excelを作成できませんでした。ページを再読み込みしてCSVを読み込み直してください。'], true); }
   finally { setBusy(false); }
 });
+setBusy(false);

@@ -1,4 +1,4 @@
-import { POKEMON_ICONS, ICON_COLUMNS, ICON_SLOTS } from './pokemon/data.js';
+import { POKEMON_ICONS, ICON_COLUMNS, ICON_SLOTS } from './pokemon/data.js?v=4';
 
 // アイコン用の表記ゆれ吸収だけを行い、KP集計のグループ分けには影響させません。
 export function iconNameKey(name) {
