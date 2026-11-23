@@ -1,8 +1,10 @@
 # mmm tools
 
-ポケモンオフ会・大会の参加者パーティCSVからKPを集計する、静的ウェブアプリです。
+過去作を中心に、ポケモンの対戦やオフ会で使うツールをまとめる静的ウェブサイトです。現在はKP集計ツールを公開しています。
 
-公開URL: https://amuma.github.io/mmmtools/
+トップページ: https://amuma.github.io/mmmtools/
+
+KP集計: https://amuma.github.io/mmmtools/kp/
 
 ## 機能
 
@@ -44,7 +46,7 @@ KPは、そのポケモンを採用した参加者数です。自身の採用を
 
 公式手順: [公開元の設定](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 
-公開先URLを変更するときは、`index.html` のcanonical・OGP・構造化データ、`robots.txt`、`sitemap.xml` のURLを更新してください。SEO用の説明文や見出しはJavaScript実行前からHTML内にあります。検索結果への登録や順位を保証するものではありません。
+公開先URLを変更するときは、`index.html` と `kp/index.html` のcanonical・OGP・構造化データ、`robots.txt`、`sitemap.xml` のURLを更新してください。SEO用の説明文や見出しはJavaScript実行前からHTML内にあります。検索結果への登録や順位を保証するものではありません。
 
 ## ローカル確認
 
@@ -66,7 +68,9 @@ KP計算、CSVの引用符・改行、文字コード、入力エラー、5,000�
 
 ## 構成・プライバシー
 
-- `index.html`: 検索可能な説明文と画面構造
+- `index.html`: ツール集のトップページ
+- `kp/index.html`: KP集計ツールとフォルム入力例
+- `assets/home.css`: トップページのデザイン
 - `assets/style.css`: 黒基調のデザイン
 - `assets/core.js`: CSV解析、検証、KP集計
 - `assets/workbook.js`: Excel生成
