@@ -25,7 +25,7 @@
   <a class="skip-link" href="#tool">集計ツールへ移動</a>
   <header class="site-header wrap">
     <a class="brand" href="./" aria-label="mmm tools ホーム"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>mmm tools<span class="brand-period">.</span></a>
-    <nav aria-label="メインナビゲーション"><a href="#tool">KP集計</a><a href="#guide">使い方</a><a href="./template.csv" download="mmm-tools-template.csv" class="nav-template">CSVテンプレート <span aria-hidden="true">↓</span></a></nav>
+    <nav aria-label="メインナビゲーション"><a href="#tool">KP集計</a><a href="#guide">使い方</a><a href="./template.csv" download="mmm-tools-template.csv" class="nav-template">CSVテンプレート</a></nav>
   </header>
   <main class="wrap">
     <section class="hero" aria-labelledby="main-title">
@@ -39,7 +39,7 @@
         <div class="panel-heading"><h2 id="upload-heading">CSVを読み込む</h2><span class="file-tag">.csv</span></div>
         <div class="drop-zone" id="drop-zone">
           <svg class="file-icon" width="36" height="42" viewBox="0 0 36 42" fill="none" aria-hidden="true"><path d="M7 2h15l9 9v28H7V2Z" stroke="currentColor" stroke-width="1.5"/><path d="M22 2v10h9M12 23h14M12 29h14" stroke="currentColor" stroke-width="1.5"/></svg>
-          <p class="drop-title">CSVファイルをドロップ</p><p class="drop-hint">または、ファイルを選択してください</p>
+          <p class="drop-title">CSVファイルをドロップ</p><p class="drop-hint">または、下のボタンから選択</p>
           <button class="button button-primary" id="choose-file" type="button">ファイルを選択</button>
           <input id="csv-file" type="file" accept=".csv,text/csv" hidden>
           <p class="drop-limit">最大5MB / 5,000人まで</p>
@@ -66,7 +66,7 @@
     </section>
 
     <section class="guide" id="guide" aria-labelledby="guide-heading">
-      <div class="guide-intro"><p class="eyebrow">QUICK GUIDE</p><h2 id="guide-heading">用意するのは、<br>7列のCSVだけ。</h2><p>参加者名と、パーティのポケモン6匹。<br>テンプレートに入力して、そのまま読み込めます。</p><a href="./template.csv" class="template-link" download="mmm-tools-template.csv">CSVテンプレートをダウンロード <span aria-hidden="true">↓</span></a></div>
+      <div class="guide-intro"><p class="eyebrow">QUICK GUIDE</p><h2 id="guide-heading">用意するのは、<br>7列のCSVだけ。</h2><p>参加者名と、パーティのポケモン6匹。<br>テンプレートに入力して、そのまま読み込めます。</p><a href="./template.csv" class="template-link" download="mmm-tools-template.csv">CSVテンプレートをダウンロード</a></div>
       <div class="csv-guide"><div class="code-heading"><span>CSV FORMAT</span><span>ヘッダー付き推奨</span></div><div class="table-scroll"><table class="example-table"><caption class="sr-only">参加者パーティCSVの記入例</caption><thead><tr><th>参加者名</th><th>ポケモン1</th><th>ポケモン2</th><th>ポケモン3</th><th>ポケモン4</th><th>ポケモン5</th><th>ポケモン6</th></tr></thead><tbody><tr><td>たろう</td><td>カイリュー</td><td>ハバタクカミ</td><td>サーフゴー</td><td>パオジアン</td><td>ディンルー</td><td>オーガポン</td></tr><tr><td>はなこ</td><td>カイリュー</td><td>ガチグマ</td><td>サーフゴー</td><td>ウーラオス</td><td>ゴリランダー</td><td>キュウコン</td></tr></tbody></table></div><p>UTF-8・Shift_JIS対応。ヘッダーなしのCSVも読み込めます。<br>参加者名と6匹すべてを入力してください。</p></div>
     </section>
     <section class="about" aria-label="KPの集計ルールとよくある質問">
