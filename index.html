@@ -16,7 +16,7 @@
   <meta property="og:description" content="参加者パーティのCSVから、ポケモン別KPと参加者別KP合計を集計。結果をExcelでダウンロードできます。">
   <meta property="og:url" content="https://amuma.github.io/mmmtools/">
   <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
-  <link rel="stylesheet" href="./assets/style.css?v=4">
+  <link rel="stylesheet" href="./assets/style.css?v=5">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"mmm tools","url":"https://amuma.github.io/mmmtools/","description":"ポケモンオフ会の参加者パーティCSVからポケモン別KPと参加者別KP合計を集計し、Excelで出力するツール。","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","inLanguage":"ja","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}</script>
   <script defer src="./assets/vendor/exceljs-4.4.0.min.js"></script>
   <script type="module" src="./assets/app.js?v=4"></script>
@@ -60,7 +60,32 @@
 
     <section class="about" id="about" aria-label="KPの集計ルールとよくある質問">
       <details><summary>KP・KP合計はどう計算しますか？<span aria-hidden="true">+</span></summary><div><p>KP（被りポイント）は、そのポケモンを採用している参加者の数です。たとえばカイリューを10人が採用していれば、カイリューのKPは10。参加者別KP合計は、パーティ6匹それぞれのKPを足した値です。自分自身の採用も含みます。採用率は「KP ÷ 参加者数 × 100」で計算します。</p></div></details>
-      <details><summary>フォルムや名前の表記はどう扱いますか？<span aria-hidden="true">+</span></summary><div><p>ポケモン名は前後の空白を取り除き、全角・半角を統一してから集計します。それ以外は同じ文字列のものをまとめます。「ロトム」と「ロトム(ウォッシュ)」など、フォルム名を含めて表記を揃えてください。名前の正誤や実在するポケモンかどうかは判定しません。同じ参加者名の重複や、1パーティ内の同じポケモンの重複はエラーとしてお知らせします。</p></div></details>
+      <details>
+        <summary>フォルム違いの入力はどうすればよいですか？<span aria-hidden="true">+</span></summary>
+        <div>
+          <p>CSVの各ポケモン欄に、以下のいずれかの表記で入力してください。括弧は全角・半角どちらでも使えます。同じフォルムは表記を揃えて入力してください。</p>
+          <ul class="form-input-list">
+            <li>ロトム（水）、ロトム（氷）、ロトム（火）、ロトム（飛）、ロトム（草）</li>
+            <li>デオキシス（アタック）、デオキシス（スピード）、デオキシス（ディフェンス）、デオキシス（ノーマル）</li>
+            <li>ギラティナ（オリジン）、ギラティナ（アナザー）</li>
+            <li>ディアルガ（オリジン）</li>
+            <li>パルキア（オリジン）</li>
+            <li>オーガポン（みどり）、オーガポン（いど）、オーガポン（かまど）、オーガポン（いしずえ）</li>
+            <li>トルネロス（けしん）、トルネロス（れいじゅう）</li>
+            <li>ボルトロス（けしん）、ボルトロス（れいじゅう）</li>
+            <li>ランドロス（けしん）、ランドロス（れいじゅう）</li>
+            <li>ラブトロス（けしん）、ラブトロス（れいじゅう）</li>
+            <li>キュレム（ブラック）、キュレム（ホワイト）</li>
+            <li>ネクロズマ（あかつき）、ネクロズマ（たそがれ）</li>
+            <li>バドレックス（はくばじょう）、バドレックス（こくばじょう）</li>
+            <li>ミノムッチ（くさき）、ミノムッチ（すなち）、ミノムッチ（ゴミ）</li>
+            <li>ミノマダム（くさき）、ミノマダム（すなち）、ミノマダム（ゴミ）</li>
+            <li>オドリドリ（ぱちぱち）、オドリドリ（ふらふら）、オドリドリ（めらめら）、オドリドリ（まいまい）</li>
+            <li>シキジカ（はる）、シキジカ（なつ）、シキジカ（あき）、シキジカ（ふゆ）</li>
+            <li>メブキジカ（はる）、メブキジカ（なつ）、メブキジカ（あき）、メブキジカ（ふゆ）</li>
+          </ul>
+        </div>
+      </details>
       <details><summary>Excelには何が出力されますか？<span aria-hidden="true">+</span></summary><div><p>「参加者別KP」と「ポケモン別KP」の2シートを含む.xlsxファイルを出力します。参加者別KPには順位・参加者名・KP合計・パーティ6匹と各ポケモンのKP、ポケモン別KPには順位・ポケモン名・KP・採用率を記載します。どちらもKPの多い順で、見出し行を固定し、フィルターを設定しています。</p></div></details>
       <details><summary>参加者のデータは保存されますか？<span aria-hidden="true">+</span></summary><div><p>CSVの読み込み・集計・Excel生成はブラウザ内で完結します。ファイルを外部サーバーへ送信せず、ブラウザの保存領域にも記録しません。「データをクリア」またはページの再読み込みで集計内容を消去できます。ダウンロードしたファイルは端末に残ります。</p></div></details>
     </section>
