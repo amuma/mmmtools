@@ -1,5 +1,6 @@
 import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, MAX_BYTES, CsvError } from './core.js';
 import { createWorkbook } from './workbook.js';
+import { createPokemonLabel } from './pokemon-icons.js';
 
 const $ = id => document.getElementById(id);
 const state = { data: null, tab: 'pokemon', page: 1, name: '', buffer: null, busy: false, generation: 0 };
@@ -45,7 +46,8 @@ function showResults(data, name, encoding = '') {
   $('stat-players').textContent = number.format(data.totalPlayers);
   $('stat-species').textContent = number.format(data.totalSpecies);
   const leaders = data.pokemon.filter(item => item.rank === 1);
-  $('stat-top').textContent = leaders[0].name + (leaders.length > 1 ? ` ほか${leaders.length - 1}種` : '');
+  $('stat-top').replaceChildren(createPokemonLabel(leaders[0].name));
+  if (leaders.length > 1) $('stat-top').append(document.createTextNode(` ほか${leaders.length - 1}種`));
   $('stat-top-detail').textContent = `KP ${leaders[0].kp} / 採用率 ${percent(leaders[0].usage)}`;
   feedback([`${number.format(data.totalPlayers)}人のパーティを集計しました。${encoding ? `（${encoding === 'utf-8' ? 'UTF-8' : 'Shift_JIS'} / ${data.hasHeader ? 'ヘッダーあり' : 'ヘッダーなし'}）` : ''}`]);
   renderTable();
@@ -103,7 +105,9 @@ function renderTable() {
   for (const item of filtered.slice(offset, offset + PAGE_SIZE)) {
     const row = document.createElement('tr');
     textCell(row, number.format(item.rank), `rank${item.rank <= 3 ? ' rank-top' : ''}`);
-    textCell(row, item.name);
+    const nameCell = textCell(row, '');
+    if (isPokemon) nameCell.append(createPokemonLabel(item.name));
+    else nameCell.textContent = item.name;
     textCell(row, number.format(item[key]), 'numeric kp-value');
     if (isPokemon) {
       const cell = textCell(row, '', 'usage-cell');
@@ -114,7 +118,7 @@ function renderTable() {
       container.append(bar, value); cell.append(container);
     } else {
       const cell = textCell(row, '', 'party-cell'); const party = document.createElement('div'); party.className = 'party-list';
-      item.party.forEach((name, i) => { const label = document.createElement('span'); label.append(document.createTextNode(name)); const kp = document.createElement('small'); kp.textContent = `(${item.partyKp[i]})`; label.append(kp); party.append(label); });
+      item.party.forEach((name, i) => { const label = createPokemonLabel(name); const kp = document.createElement('small'); kp.textContent = `(${item.partyKp[i]})`; label.append(kp); party.append(label); });
       cell.append(party);
     }
     body.append(row);
@@ -133,6 +137,10 @@ function download(blob, name) {
 }
 
 $('choose-file').addEventListener('click', () => { $('csv-file').value = ''; $('csv-file').click(); });
+// CSVの記入例も同じアイコン表示に揃えます。入力する文字列は名前のままです。
+document.querySelectorAll('.example-table tbody td:not(:first-child)').forEach(cell => {
+  const name = cell.textContent.trim(); cell.replaceChildren(createPokemonLabel(name));
+});
 $('csv-file').addEventListener('change', event => loadFile(event.target.files[0]));
 $('reset-button').addEventListener('click', reset);
 $('encoding').addEventListener('change', () => {
