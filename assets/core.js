@@ -70,21 +70,22 @@ export function validateRows(rows) {
   if (!rows.length) throw new CsvError(['参加者データがありません。']);
   const first = rows[0].cells.map(normalizePokemon);
   const hasHeader = first[0] === HEADERS[0];
-  if (hasHeader && (first.length !== 7 || first.some((value, i) => value !== HEADERS[i]))) {
-    throw new CsvError(['ヘッダーは「参加者名,ポケモン1,ポケモン2,ポケモン3,ポケモン4,ポケモン5,ポケモン6」の7列にしてください。']);
+  if (hasHeader && (first.length < 5 || first.length > 7 || first.some((value, i) => i < 5 ? value !== HEADERS[i] : value !== '' && value !== HEADERS[i]))) {
+    throw new CsvError(['ヘッダーは「参加者名,ポケモン1,ポケモン2,ポケモン3,ポケモン4」を先頭に指定してください。ポケモン5・6の見出しは空欄・省略が可能です。']);
   }
   const dataRows = hasHeader ? rows.slice(1) : rows;
   if (!dataRows.length) throw new CsvError(['ヘッダーのみのCSVです。参加者データを追加してください。']);
   if (dataRows.length > MAX_PLAYERS) throw new CsvError([`参加者数は${MAX_PLAYERS.toLocaleString()}人までです。`]);
   const errors = [], names = new Set(), participants = [];
   for (const { cells, line } of dataRows) {
-    if (cells.length !== 7) { errors.push(`${line}行目：${cells.length}列あります。参加者名とポケモン6匹の7列にしてください。`); continue; }
+    if (cells.length < 5 || cells.length > 7) { errors.push(`${line}行目：${cells.length}列あります。参加者名とポケモン4〜6匹の5〜7列にしてください。`); continue; }
     const name = cells[0].trim();
-    const party = cells.slice(1).map(normalizePokemon);
+    // 省略された末尾列を補い、Excelでもポケモン1〜6の位置を保ちます。
+    const party = Array.from({ length: 6 }, (_, i) => normalizePokemon(cells[i + 1] ?? ''));
     if (!name) errors.push(`${line}行目：参加者名が空欄です。`);
     else if (names.has(name)) errors.push(`${line}行目：参加者名「${name}」が重複しています。識別できる名前にしてください。`);
     names.add(name);
-    party.forEach((pokemon, i) => { if (!pokemon) errors.push(`${line}行目：ポケモン${i + 1}が空欄です。6匹すべて入力してください。`); });
+    party.slice(0, 4).forEach((pokemon, i) => { if (!pokemon) errors.push(`${line}行目：ポケモン${i + 1}が空欄です。ポケモン1〜4は入力してください。`); });
     if (cells.some(value => value.length > 100)) errors.push(`${line}行目：100文字を超えるセルがあります。`);
     if (new Set(party.filter(Boolean)).size !== party.filter(Boolean).length) errors.push(`${line}行目：パーティ内に同じポケモンが重複しています。フォルムを分ける場合は名前に含めてください。`);
     participants.push({ name, party, sourceLine: line });
@@ -104,10 +105,10 @@ export function rankByKp(items, field) {
 
 export function aggregate(participants) {
   const counts = new Map();
-  for (const player of participants) for (const pokemon of new Set(player.party)) counts.set(pokemon, (counts.get(pokemon) || 0) + 1);
+  for (const player of participants) for (const pokemon of new Set(player.party.filter(Boolean))) counts.set(pokemon, (counts.get(pokemon) || 0) + 1);
   const pokemon = rankByKp([...counts].map(([name, kp]) => ({ name, kp, usage: kp / participants.length })), 'kp');
   const players = rankByKp(participants.map(player => {
-    const partyKp = player.party.map(name => counts.get(name));
+    const partyKp = player.party.map(name => name ? counts.get(name) : 0);
     return { ...player, partyKp, total: partyKp.reduce((sum, kp) => sum + kp, 0) };
   }), 'total');
   return { pokemon, players, totalPlayers: players.length, totalSpecies: pokemon.length };

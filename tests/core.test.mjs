@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url);
 const ExcelJS = require('../assets/vendor/exceljs-4.4.0.min.js');
 const header = HEADERS.join(',');
 const row = 'たろう,カイリュー,ハバタクカミ,サーフゴー,パオジアン,ディンルー,オーガポン';
+const mixedParties = 'A,a,b,c,d,,\nB,a,b,c,e,f,\nC,a,b,g,h,i,j';
 const invalid = (text, pattern) => assert.throws(() => analyzeCsv(text), error => error instanceof CsvError && error.messages.some(message => pattern.test(message)));
 
 test('KPと参加者合計・採用率・同順位を計算する', () => {
@@ -24,6 +25,28 @@ test('BOM・CRLF・空行・ヘッダーなしに対応', () => {
   assert.equal(analyzeCsv(`\uFEFF${header}\r\n\r\n${row}\r\n`).totalPlayers, 1);
   assert.equal(analyzeCsv(row).hasHeader, false);
 });
+test('4・5・6匹が混在しても空欄を数えずKP・採用率を計算する', () => {
+  const data = analyzeCsv(mixedParties);
+  assert.equal(data.totalPlayers, 3); assert.equal(data.totalSpecies, 10);
+  assert.equal(data.pokemon.some(p => p.name === ''), false);
+  assert.equal(data.pokemon.find(p => p.name === 'a').kp, 3);
+  assert.equal(data.pokemon.find(p => p.name === 'c').usage, 2 / 3);
+  assert.deepEqual(Object.fromEntries(data.players.map(p => [p.name, p.total])), { B: 10, C: 10, A: 9 });
+  assert.deepEqual(data.players.find(p => p.name === 'A').partyKp, [3, 3, 2, 1, 0, 0]);
+  assert.equal(data.pokemon.reduce((sum, p) => sum + p.kp, 0), 15);
+  assert.equal(data.players.reduce((sum, p) => sum + p.total, 0), data.pokemon.reduce((sum, p) => sum + p.kp ** 2, 0));
+});
+test('ヘッダーなし・5/6の見出し省略・見出し空欄・末尾列省略を読み込む', () => {
+  const headers = [null, header, HEADERS.slice(0, 5).join(','), HEADERS.slice(0, 6).join(','), `${HEADERS.slice(0, 5).join(',')},,`, `${HEADERS.slice(0, 6).join(',')},`];
+  for (const headings of headers) {
+    const data = analyzeCsv(`${headings === null ? '' : headings + '\n'}A,a,b,c,d\nB,a,b,c,e,f\nC,a,b,g,h,i,j`);
+    assert.equal(data.totalPlayers, 3); assert.equal(data.hasHeader, headings !== null);
+    assert.equal(data.players.find(p => p.name === 'A').party.length, 6);
+    assert.equal(data.players.find(p => p.name === 'A').total, 9);
+  }
+  assert.equal(analyzeCsv('A,a,b,c,d,   ,　').players[0].total, 4);
+  invalid(`${HEADERS.slice(0, 5).join(',')},誤った見出し,\nA,a,b,c,d,,`, /ヘッダー/);
+});
 test('引用符内のカンマ・エスケープ・改行と物理行番号', () => {
   const rows = parseCsv('"田中, \"\"太郎\"\"\nさん",a,b,c,d,e,f\r\n次の人,a,b,c,d,e,f');
   assert.equal(rows[0].cells[0], '田中, "太郎"\nさん');
@@ -38,15 +61,15 @@ test('CSVの不正な引用符を拒否する', () => {
   invalid('"a,b,c', /引用符/); invalid('a"b,c', /引用符/); invalid('"a"z,b', /引用符/);
 });
 test('列数・ヘッダー・空データを検証する', () => {
-  invalid('A,b,c', /7列/); invalid(`${row},余分`, /7列/);
+  invalid('A,b,c', /5〜7列/); invalid(`${row},余分`, /5〜7列/);
   invalid('参加者名,ポケモン1', /ヘッダー/); invalid(header, /ヘッダーのみ/); invalid('\n', /空/);
 });
 test('空欄・参加者重複・パーティ内重複を拒否する', () => {
-  invalid(',a,b,c,d,e,f', /参加者名が空欄/); invalid('A,a,b,c,d,e,', /ポケモン6/);
+  invalid(',a,b,c,d,e,f', /参加者名が空欄/); invalid('A,a,b,c,,e,f', /ポケモン4/);
   invalid(`${row}\n${row}`, /参加者名.*重複/); invalid('A,ポリゴン2,ポリゴン２,c,d,e,f', /パーティ内/);
 });
 test('複数エラーを行番号付きで返す', () => {
-  assert.throws(() => analyzeCsv(`${header}\nA,a,b\nB,a,b,c,d,e,`), error => error.messages.length === 2 && error.messages[0].startsWith('2行目') && error.messages[1].startsWith('3行目'));
+  assert.throws(() => analyzeCsv(`${header}\nA,a,b\nB,a,b,c,,e,f`), error => error.messages.length === 2 && error.messages[0].startsWith('2行目') && error.messages[1].startsWith('3行目'));
 });
 test('UTF-8とShift_JISを自動判別する', () => {
   const utf8 = new TextEncoder().encode('参加者名');
@@ -84,6 +107,20 @@ test('Excelを生成して再読込し、数値・順位・パーティと採用
   data.pokemon.forEach((item, i) => { assert.equal(pokemon.getCell(`C${i + 2}`).value, item.kp); assert.equal(pokemon.getCell(`D${i + 2}`).value, item.usage); });
   assert.equal(pokemon.getCell('D2').numFmt, '0.0%');
   assert.equal(players.views[0].ySplit, 1); assert.ok(pokemon.autoFilter);
+});
+test('少数パーティのExcel出力で未入力セルを空欄にし、ポケモン6の位置を保つ', async () => {
+  const data = analyzeCsv(`${mixedParties}\nD,a,b,c,d,,k`);
+  const workbook = createWorkbook(data, ExcelJS);
+  const loaded = new ExcelJS.Workbook(); await loaded.xlsx.load(await workbook.xlsx.writeBuffer());
+  const sheet = loaded.worksheets[0];
+  const playerRow = name => sheet.getRow(data.players.findIndex(p => p.name === name) + 2);
+  for (const column of [12, 13, 14, 15]) assert.equal(playerRow('A').getCell(column).value, null);
+  for (const column of [14, 15]) assert.equal(playerRow('B').getCell(column).value, null);
+  for (const column of [12, 13]) assert.equal(playerRow('D').getCell(column).value, null);
+  assert.equal(playerRow('D').getCell(14).value, 'k');
+  assert.equal(playerRow('D').getCell(15).value, 1);
+  for (const player of data.players) assert.equal(playerRow(player.name).getCell(3).value, player.total);
+  assert.equal(loaded.worksheets[1].rowCount, data.totalSpecies + 1);
 });
 test('入力のHTML・数式・URLを実行可能なデータに変換しない', async () => {
   // 引用符が含まれる名前をCSVの規則に従ってエスケープする。

@@ -1,5 +1,5 @@
-import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, MAX_BYTES, CsvError } from './core.js';
-import { createWorkbook } from './workbook.js';
+import { analyzeCsv, decodeCsv, compareNames, normalizePokemon, MAX_BYTES, CsvError } from './core.js?v=7';
+import { createWorkbook } from './workbook.js?v=7';
 import { createPokemonLabel } from './pokemon-icons.js?v=4';
 
 const $ = id => document.getElementById(id);
@@ -118,7 +118,7 @@ function renderTable() {
       container.append(bar, value); cell.append(container);
     } else {
       const cell = textCell(row, '', 'party-cell'); const party = document.createElement('div'); party.className = 'party-list';
-      item.party.forEach((name, i) => { const label = createPokemonLabel(name); const kp = document.createElement('small'); kp.textContent = `(${item.partyKp[i]})`; label.append(kp); party.append(label); });
+      item.party.forEach((name, i) => { if (!name) return; const label = createPokemonLabel(name); const kp = document.createElement('small'); kp.textContent = `(${item.partyKp[i]})`; label.append(kp); party.append(label); });
       cell.append(party);
     }
     body.append(row);

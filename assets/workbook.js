@@ -4,7 +4,7 @@ export function createWorkbook(data, ExcelJS, sourceName = '') {
   workbook.creator = 'mmm tools';
   workbook.created = new Date();
   workbook.subject = 'ポケモンオフ会 KP集計';
-  workbook.description = `入力：${sourceName} / KP＝採用参加者数（自身を含む） / 参加者別KP合計＝パーティ6匹のKP合計 / 採用率＝KP÷参加者数`;
+  workbook.description = `入力：${sourceName} / KP＝採用参加者数（自身を含む） / 参加者別KP合計＝入力されたポケモンのKP合計（空欄を除く） / 採用率＝KP÷参加者数`;
   const participants = workbook.addWorksheet('参加者別KP', { views: [{ state: 'frozen', ySplit: 1, xSplit: 2 }], properties: { tabColor: { argb: 'B3CD7C' } } });
   participants.columns = [
     { header: '順位', key: 'rank', width: 8 },
@@ -17,7 +17,7 @@ export function createWorkbook(data, ExcelJS, sourceName = '') {
   ];
   for (const player of data.players) {
     const row = { rank: player.rank, name: player.name, total: player.total };
-    player.party.forEach((name, i) => { row[`pokemon${i}`] = name; row[`kp${i}`] = player.partyKp[i]; });
+    player.party.forEach((name, i) => { row[`pokemon${i}`] = name || null; row[`kp${i}`] = name ? player.partyKp[i] : null; });
     participants.addRow(row);
   }
   const pokemon = workbook.addWorksheet('ポケモン別KP', { views: [{ state: 'frozen', ySplit: 1 }], properties: { tabColor: { argb: '6A8751' } } });
@@ -39,7 +39,7 @@ export function createWorkbook(data, ExcelJS, sourceName = '') {
       });
     });
   }
-  participants.getCell('C1').note = 'パーティ6匹それぞれのKPの合計。KPはそのポケモンを採用した参加者数で、自分自身も含みます。';
+  participants.getCell('C1').note = '入力されたポケモンそれぞれのKPの合計（空欄を除く）。KPはそのポケモンを採用した参加者数で、自分自身も含みます。';
   pokemon.getCell('C1').note = 'このポケモンを採用した参加者の数（自身を含む）。';
   pokemon.getCell('D1').note = `KP ÷ 参加者数（${data.totalPlayers}人）。`;
   return workbook;
